@@ -11,15 +11,16 @@ class DBmodel(Model):
 class User(DBmodel):
     name = CharField()
     address = CharField()
+    location = CharField()
+    postal_code = CharField()
     billing = IntegerField()
+    # Billing should include more information
 
     # Each user must be able to own a number of products.
     # products = ManyToManyField()
     # Not sure yet?
 
 
-class UserProduct(DBmodel):
-    pass
 
 # The products must have a name, a description, a price per unit, and a quantity describing the amount in stock.
 class Product(DBmodel):
@@ -29,11 +30,12 @@ class Product(DBmodel):
     price = FloatField()
     quantity = IntegerField()
 
-
+    # product owner?
+    # productOwner = CharField()
 
 # In order to facilitate search and categorization, a product must have a number of descriptive tags.
 class Tag(DBmodel):
-    tag = CharField()
+    tag = CharField(unique=True, index=True)
     # The tags should not be duplicated.
 
 class ProductTag(DBmodel):

@@ -1,19 +1,38 @@
-import peewee
+# import peewee
 from models import *
+from create_data import *
 
 __winc_id__ = "d7b474e9b3a54d23bca54879a4f1855b"
 __human_name__ = "Betsy Webshop"
 
+template = "{product.name} {product.description} {product.price} {product.quantity}"
+
 def main():
-    pass
+    db.connect()
+    db.create_tables([User, Product, Tag, ProductTag, Transaction])
+
+    # create_data()
+
+    search('sweater')
 
 
 # Search for products based on a term. 
-# Searching for 'sweater' should yield all products that have the word 'sweater' in the name. 
+# Searching for 'sweater' should yield all products 
+# that have the word 'sweater' in the name. 
 # This search should be case-insensitive
 def search(term):
-    pass
+    search_term = term.lower()
+    match = Product.select().where(
+        (fn.lower(Product.name).contains(search_term)) 
+        or 
+        (fn.lower(Product.description).contains(search_term))
+    )
 
+    if match:
+        for product in match:
+            print(product.name)
+    else:
+        print('Product not found')
 
 # View the products of a given user.
 def list_user_products(user_id):
