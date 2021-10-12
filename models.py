@@ -21,6 +21,11 @@ class User(DBmodel):
     # Not sure yet?
 
 
+# In order to facilitate search and categorization, a product must have a number of descriptive tags.
+class Tag(DBmodel):
+    tag = CharField()
+    # Unique?
+    # The tags should not be duplicated.
 
 # The products must have a name, a description, a price per unit, and a quantity describing the amount in stock.
 class Product(DBmodel):
@@ -29,22 +34,22 @@ class Product(DBmodel):
     # The price should be stored in a safe way; rounding errors should be impossible.
     price = FloatField()
     quantity = IntegerField()
+    tags = ForeignKeyField(Tag, backref='p_tag')
 
     # product owner?
     # productOwner = CharField()
 
-# In order to facilitate search and categorization, a product must have a number of descriptive tags.
-class Tag(DBmodel):
-    tag = CharField(unique=True, index=True)
-    # The tags should not be duplicated.
+class UserProduct(DBmodel):
+    owner = CharField()
+    product = CharField()
+    quantity = IntegerField()
+    tags = ForeignKeyField(Tag, backref='up_tag')
 
-class ProductTag(DBmodel):
-    pass
 
 # We want to be able to track the purchases made on the marketplace, therefore a transaction model must exist
 # You can assume that only users can purchase goods
 class Transaction(DBmodel):
-    date = DateField()
+    date = CharField()
     # The transaction model must link a buyer with a purchased product and a quantity of purchased items
     user = CharField()
     product = CharField()
