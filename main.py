@@ -1,7 +1,7 @@
-# import peewee
 from models import *
 from create_data import *
 from datetime import datetime
+from fuzzywuzzy import fuzz
 
 __winc_id__ = "d7b474e9b3a54d23bca54879a4f1855b"
 __human_name__ = "Betsy Webshop"
@@ -14,8 +14,9 @@ def main():
 
     # create_data()
 
-    # search('sweater')
-    # search('koffie')
+    search('sweater')
+    search('koffie')
+    search('kfie')
     # search('JBL')
     # list_user_products('Niels')
     # list_user_products('Renier')
@@ -36,18 +37,20 @@ def main():
 
 # Search for products based on a term. 
 def search(term):
+
     search_term = term.lower()
     match = Product.select().where(
         (fn.lower(Product.name).contains(search_term)) |
         (fn.lower(Product.description).contains(search_term))
     )
+    score = fuzz.ratio(search_term, match)
 
-    if match:
-        print(f"De term {term} is gematched op:")
+    if score > 80:
+        print(f"Your search for {term} has been matched to:")
         for product in match:
-            print(product.name)
+            return print(product.name)
     else:
-        print('Product niet gevonden')
+        print('Product not found')
 
 # View the products of a given user.
 def list_user_products(user_id):
@@ -60,7 +63,7 @@ def list_user_products(user_id):
         for product in product_list:
             print(product.product)
     else:
-        print('De eigenaar bestaat niet of bezit geen producten')
+        print('The owner does not exist or has no products.')
 
 
 # View all products for a given tag.
@@ -68,11 +71,11 @@ def list_products_per_tag(tag_id):
     product_list = Product.select().where(Product.tags == tag_id)
 
     if product_list:
-        print(f"Deze producten hebben de {tag_id} tag:")
+        print(f"These are the products tagged {tag_id}:")
         for product in product_list:
             print(product.name)
     else:
-        print('De tag bestaat niet of heeft geen producten')
+        print('The tag does not exist or has no products attached.')
 
 # Add a product to a user.
 def add_product_to_catalog(user_id, product):
@@ -87,32 +90,32 @@ def add_product_to_catalog(user_id, product):
             quantity=1,
             tags=Product.tags
         )
-        print('New product toegevoegd.')
+        print('New product added.')
         return added_product
     else:
-        print('Persoon of product niet gevonden')
+        print('Person or product not found.')
 
 
 # Remove a product from a user.
 def remove_product(product_id):
     try:
         product = UserProduct.get(UserProduct.product == product_id)
-        print(f"Het product {product_id} is verwijderd.")
+        print(f"The product {product_id} has been removed.")
         return product.delete_instance()
     except DoesNotExist:
-        print('Kan het product niet vinden.')
+        print('Can not find product.')
 
 # Update the stock quantity of a product.
 def update_stock(product_id, new_quantity):
     product_to_change = Product.get(Product.name == product_id)
 
     if product_to_change:
-        print(f'Oude aantal: {product_to_change.quantity}')
+        print(f'Old amount: {product_to_change.quantity}')
         product_to_change.quantity = new_quantity
         product_to_change.save()
-        print(f'Nieuwe aantal: {product_to_change.quantity}')
+        print(f'New amount: {product_to_change.quantity}')
     else:
-        print('Kan product niet vinden')
+        print('Can not find product')
 
 
 # Handle a purchase between a buyer and a seller for a given product
@@ -144,9 +147,9 @@ def purchase_product(product_id, buyer_id, quantity):
             # update
             return update_stock(product_id, check_amount)    
         else:
-            print('Aantal niet op voorraad.')
+            print('Amount not in stock.')
     else:
-        print('User of Product is niet gevonden.')    
+        print('User or product not found.')    
 
 
 
