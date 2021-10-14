@@ -53,6 +53,13 @@ def create_data():
         quantity=5,
         tags="Books"
     )
+    Product.create(
+        name="Espresso machine",
+        description="Maken van lekkere koffie",
+        price=50,
+        quantity=3,
+        tags="Lifestyle"
+    )
 
     # PRODUCT OWNED BY USER
     UserProduct.create(

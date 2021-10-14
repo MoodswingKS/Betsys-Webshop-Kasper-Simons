@@ -1,7 +1,6 @@
 from models import *
 from create_data import *
 from datetime import datetime
-from fuzzywuzzy import fuzz
 
 __winc_id__ = "d7b474e9b3a54d23bca54879a4f1855b"
 __human_name__ = "Betsy Webshop"
@@ -12,45 +11,48 @@ def main():
         [User, Tag, Product, UserProduct, Transaction]
         )
 
-    # create_data()
+    """ Create data only once! """
+    create_data()
 
-    search('sweater')
-    search('koffie')
-    search('kfie')
-    # search('JBL')
+    # search test
+    # search('sweater')
+    # search('koffie')
+
     # list_user_products('Niels')
     # list_user_products('Renier')
 
     # list_products_per_tag('Books')
     # list_products_per_tag('Tech')
-
-    # remove_product('Espresso machine')
+    
+    # list_user_products('Niels')
+    # remove_product('Hardloop schoenen')
     # list_user_products('Niels')
 
     # add_product_to_catalog('Niel', 'Blue sweater')
     # list_user_products('Niels')
+    # add_product_to_catalog('Niels', 'Headphones')
+    # list_user_products('Niels')
 
     # update_stock('Headphones', 2)
+
     # purchase_product('Headphones', 'Kasper', 10)
     # purchase_product('Espresso machine', 'Niels', 1)
 
 
 # Search for products based on a term. 
 def search(term):
-
     search_term = term.lower()
     match = Product.select().where(
         (fn.lower(Product.name).contains(search_term)) |
         (fn.lower(Product.description).contains(search_term))
     )
-    score = fuzz.ratio(search_term, match)
-
-    if score > 80:
-        print(f"Your search for {term} has been matched to:")
+    if match:
+        print(f"The term {term} has been matched to:")
         for product in match:
-            return print(product.name)
+            print(product.name)
     else:
         print('Product not found')
+
 
 # View the products of a given user.
 def list_user_products(user_id):
@@ -59,7 +61,7 @@ def list_user_products(user_id):
     )
 
     if product_list:
-        print(f"{user_id} bezit:")
+        print(f"{user_id} has:")
         for product in product_list:
             print(product.product)
     else:
@@ -77,9 +79,9 @@ def list_products_per_tag(tag_id):
     else:
         print('The tag does not exist or has no products attached.')
 
+
 # Add a product to a user.
 def add_product_to_catalog(user_id, product):
-    # is working, but may need to adjust quantity if UserProduct exists already
     product_to_get = Product.select().where(Product.name == product)
     new_owner = User.select().where(User.name == user_id)
 
@@ -105,15 +107,16 @@ def remove_product(product_id):
     except DoesNotExist:
         print('Can not find product.')
 
+
 # Update the stock quantity of a product.
 def update_stock(product_id, new_quantity):
     product_to_change = Product.get(Product.name == product_id)
 
     if product_to_change:
-        print(f'Old amount: {product_to_change.quantity}')
+        print(f'Old amount {product_to_change.name}: {product_to_change.quantity}')
         product_to_change.quantity = new_quantity
         product_to_change.save()
-        print(f'New amount: {product_to_change.quantity}')
+        print(f'New amount {product_to_change.name}: {product_to_change.quantity}')
     else:
         print('Can not find product')
 
@@ -128,22 +131,23 @@ def purchase_product(product_id, buyer_id, quantity):
         get_date = datetime.strftime(current_date, '%d-%m-%Y')
         check_amount = product_to_buy.quantity - quantity
         # check if quantity exists
-
         if check_amount >= 0:
+            
             # add a new transaction to the db
-            Transaction.create(
+            transaction = Transaction.create(
                 date=get_date,
                 user=buyer_id,
                 product=product_id,
                 quantity=quantity
             )
-        
+            print(f"Transaction complete: {transaction.date}, {transaction.user}")
+
             add_product_to_catalog(buyer_id, product_id)
             list_user_products(buyer_id)
+            
             if check_amount == 0:
                 # delete product
                 return remove_product(product_id)
-
             # update
             return update_stock(product_id, check_amount)    
         else:
