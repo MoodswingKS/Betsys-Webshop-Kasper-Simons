@@ -5,9 +5,9 @@ def create_data():
     # USERS
     User.create(
         name="Kasper",
-        address="Fatimaplein 44",
+        address="Fakeplace 44",
         location="Maastricht",
-        postal_code="6214TT",
+        postal_code="6211EW",
         billing="012345"
     )
     User.create(
